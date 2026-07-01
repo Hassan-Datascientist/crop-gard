@@ -20,10 +20,11 @@ app.add_middleware(
 
 
 load_dotenv(find_dotenv())
-print(f"API KEY: {os.getenv('GROQ_API_KEY')}")
+
+API_KEY = os.getenv("GROQ_API_KEY")
 
 client = AsyncGroq(
-    api_key="",
+    api_key=API_KEY,
 )
 
 
