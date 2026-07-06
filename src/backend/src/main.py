@@ -1,16 +1,11 @@
 # import base64
-import json
-import os
-import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 import httpx
 import tensorflow as tf
-from dotenv import find_dotenv, load_dotenv
 from fastapi import Depends, FastAPI, File, UploadFile  # HTTPException,
 from fastapi.middleware.cors import CORSMiddleware
-from groq import AsyncGroq
 
 from src.dependencies import get_disease_model, get_http_client
 
@@ -42,13 +37,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-load_dotenv(find_dotenv())
-
-API_KEY = os.getenv("GROQ_API_KEY")
-
-client = AsyncGroq(api_key="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")
 
 
 CROP_LABELS = {

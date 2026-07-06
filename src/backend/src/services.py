@@ -211,9 +211,9 @@ def validate_crop_species(plantnet_result: PlantMatch) -> str:
         )
 
     # Normalize: lowercase, strip authorship (e.g. "(L.) Merr.", "L.")
-    name = plantnet_result.scientific_name.lower()
+    # name = plantnet_result.scientific_name.lower()
     # Take just genus + species (first two words), dropping authorship text
-    parts = name.split()
+    # parts = name.split()
     # genus_species = " ".join(parts[:2]) if len(parts) >= 2 else name
 
     # crop = VALID_SPECIES.get(genus_species)
