@@ -13,8 +13,9 @@ import {
   Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { uploadLeafImage } from "../services/api";
 import { SUPPORTED_CROPS } from "../services/api";
+// ── On-device TFLite inference (offline-first) ────────────────────────────────
+import { useInference } from "../ml/useInference";
 
 const TRANSLATIONS = {
   en: {
@@ -201,10 +202,16 @@ const LIGHT = {
 export default function ScanScreen({ cropName, endpoint }) {
   const [image, setImage] = useState(null);
   const [crop, setCrop] = useState("maize"); // default selection
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
   const [lang, setLang] = useState("en");
   const [isDark, setIsDark] = useState(true);
+
+  // ── On-device TFLite inference ─────────────────────────────────────────────
+  // modelState: 'loading' | 'ready' | 'error'
+  // inferring:  true while preprocessing + model.runSync() is running
+  // result:     InferenceResult | null — compatible with existing result-card UI
+  // analyze:    (imageUri, crop) => Promise<InferenceResult | null>
+  const { modelState, inferring, result, errorMessage, analyze, reset } =
+    useInference();
 
   const c = isDark ? DARK : LIGHT;
   const t = TRANSLATIONS[lang];
@@ -229,7 +236,7 @@ export default function ScanScreen({ cropName, endpoint }) {
 
     if (!picked.canceled) {
       setImage(picked.assets[0].uri);
-      setResult(null);
+      reset(); // clear previous result and error
     }
   };
 
@@ -247,19 +254,19 @@ export default function ScanScreen({ cropName, endpoint }) {
     };
   };
 
+  /**
+   * Runs on-device TFLite inference — fully offline, no network required.
+   * Falls back to an Alert on error (e.g. model file missing).
+   */
   const processImage = async () => {
     if (!image) return;
-    setLoading(true);
-    try {
-      const data = await uploadLeafImage(image, crop);
-      setResult(data);
-    } catch {
+    const inferenceResult = await analyze(image, crop);
+    if (!inferenceResult && errorMessage) {
       Alert.alert(
-        "Connection Error",
-        "Unable to reach the inference server. Please check your network and try again.",
+        "Analysis Error",
+        errorMessage ||
+          "On-device inference failed. Make sure the model file is placed in assets/models/.",
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -273,9 +280,12 @@ export default function ScanScreen({ cropName, endpoint }) {
 
   // const isHealthy = result?.disease?.toLowerCase().trim() === "healthy";
   const isHealthy = parseDiseaseLabel(result?.disease).isHealthy;
-  const confidenceNum = parseFloat(result?.confidence || 0);
+  // result.confidence is a number from the offline model (parseFloat(number) === number)
+  const confidenceNum = parseFloat(String(result?.confidence ?? 0));
   const confidenceColor =
     confidenceNum >= 80 ? c.accent : confidenceNum >= 55 ? c.warning : c.danger;
+  // Derived loading state: either the model is warming up or inference is running
+  const loading = inferring;
 
   return (
     <ScrollView
@@ -296,6 +306,40 @@ export default function ScanScreen({ cropName, endpoint }) {
               </Text>
             </View>
           ) : null}
+          {/* Model status badge — shows warm-up progress to the user */}
+          <View
+            style={[
+              styles.modelBadge,
+              {
+                backgroundColor:
+                  modelState === "ready"
+                    ? c.accentSoft
+                    : modelState === "error"
+                      ? (isDark ? "#3D1C1C" : "#FFEEF0")
+                      : c.surfaceAlt,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.modelBadgeText,
+                {
+                  color:
+                    modelState === "ready"
+                      ? c.accentText
+                      : modelState === "error"
+                        ? c.danger
+                        : c.textMuted,
+                },
+              ]}
+            >
+              {modelState === "ready"
+                ? "📱 Offline AI Ready"
+                : modelState === "error"
+                  ? "⚠️ Model Error"
+                  : "⏳ Loading AI…"}
+            </Text>
+          </View>
         </View>
         <TouchableOpacity
           style={[
@@ -694,6 +738,14 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   cropBadgeText: { fontSize: 12, fontWeight: "600", letterSpacing: 0.3 },
+  modelBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginTop: 4,
+  },
+  modelBadgeText: { fontSize: 11, fontWeight: "600", letterSpacing: 0.2 },
   themeBtn: {
     width: 40,
     height: 40,
