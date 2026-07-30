@@ -1,11 +1,31 @@
-// src/constants/theme.js
-export const COLORS = {
-  primary: '#1E4620',       // Deep Forest Green
-  accent: '#2E7D32',        // Emerald Green
-  background: '#F8F9FA',    // Clean Light Grey
-  surface: '#FFFFFF',       // Pure White
-  textPrimary: '#212529',   // Charcoal
-  textSecondary: '#6C757D', // Muted Grey
-  border: '#E9ECEF',        // Soft Divider
-  error: '#DC3545'          // Crimson
-}; 
+export const DARK = {
+  bg: "#0D1117",
+  surface: "#161B22",
+  surfaceAlt: "#1C2128",
+  border: "#30363D",
+  borderStrong: "#484F58",
+  text: "#E6EDF3",
+  textMuted: "#8B949E",
+  textFaint: "#484F58",
+  accent: "#3FB950",
+  accentSoft: "#1B4D2E",
+  accentText: "#56D364",
+  warning: "#D29922",
+  danger: "#F85149",
+};
+
+export const LIGHT = {
+  bg: "#F6F8FA",
+  surface: "#FFFFFF",
+  surfaceAlt: "#F0F3F6",
+  border: "#D0D7DE",
+  borderStrong: "#AFB8C1",
+  text: "#1F2328",
+  textMuted: "#656D76",
+  textFaint: "#CFD4DA",
+  accent: "#1A7F37",
+  accentSoft: "#DAFBE1",
+  accentText: "#1A7F37",
+  warning: "#9A6700",
+  danger: "#CF222E",
+};

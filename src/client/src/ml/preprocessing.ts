@@ -15,7 +15,7 @@
 // on both Hermes and JSC runtimes.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import * as FileSystem from 'expo-file-system';
+import { File } from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import jpeg from 'jpeg-js';
 
@@ -62,36 +62,18 @@ export async function resizeImage(
 
 // ─── Step 2: Decode to raw pixels ────────────────────────────────────────────
 
-/**
- * Reads a local JPEG file URI and decodes it to a raw RGBA Uint8Array.
- *
- * Uses:
- *  1. expo-file-system to read the file as a base64 string
- *  2. atob() (available in Hermes ≥ RN 0.71 and JSC) to get binary
- *  3. jpeg-js (pure JS) to decode the JPEG bitstream → RGBA pixels
- */
 async function decodeJpegToRGBA(uri: string): Promise<{
   width: number;
   height: number;
   data: Uint8Array;
 }> {
-  // Read the JPEG file as base64
-  const base64 = await FileSystem.readAsStringAsync(uri, {
-    encoding: 'base64' as const,
-  });
+  const file = new File(uri);
+  const bytes = await file.bytes();
 
-  // base64 → binary string → Uint8Array
-  const binaryStr = atob(base64);
-  const bytes = new Uint8Array(binaryStr.length);
-  for (let i = 0; i < binaryStr.length; i++) {
-    bytes[i] = binaryStr.charCodeAt(i);
-  }
-
-  // Decode JPEG → raw RGBA
   const decoded = jpeg.decode(bytes, {
-    useTArray: true,       // return Uint8Array instead of Buffer (works in RN)
-    formatAsRGBA: true,    // always output 4 channels
-    tolerantDecoding: true, // don't throw on minor JPEG artefacts
+    useTArray: true,
+    formatAsRGBA: true,
+    tolerantDecoding: true,
   });
 
   return {

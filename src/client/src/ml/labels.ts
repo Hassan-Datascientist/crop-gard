@@ -14,20 +14,22 @@
  * underscore as the crop/disease separator — matches the existing
  * parseDiseaseLabel() in ScanScreen.)
  */
+export const UNSUPPORTED_THRESHOLD = 0.5;
+
 export const DISEASE_LABELS: readonly string[] = [
   // ── Beans (3 classes) ─────────────────────────────────────────────────────
-  'Beans___Angular_Leaf_Spot',
-  'Beans___Bean_Rust',
-  'Beans___Healthy',
+  'Bean___Other_Disease',
+  'Bean___Rust',
+  'Bean___healthy',
   // ── Maize (4 classes) ─────────────────────────────────────────────────────
-  'Maize___Common_Rust',
-  'Maize___Gray_Leaf_Spot',
-  'Maize___Healthy',
-  'Maize___Northern_Leaf_Blight',
+  'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot',
+  'Corn_(maize)___Common_rust_',
+  'Corn_(maize)___Northern_Leaf_Blight',
+  'Corn_(maize)___healthy',
   // ── Potato (3 classes) ────────────────────────────────────────────────────
-  'Potato___Early_Blight',
-  'Potato___Healthy',
-  'Potato___Late_Blight',
+  'Potato___Early_blight',
+  'Potato___Late_blight',
+  'Potato___healthy',
 ] as const;
 
 /** Number of output classes. */
@@ -43,22 +45,13 @@ export interface TopKPrediction {
 }
 
 export interface InferenceResult {
-  /**
-   * Top-1 label string — e.g. "Maize___Common_Rust".
-   * Deliberately matches the `disease` field returned by the remote API so
-   * the existing parseDiseaseLabel() and result-card UI work without changes.
-   */
   disease: string;
-
-  /**
-   * Top-1 confidence expressed as a percentage (0–100).
-   * Stored as number; parseFloat(number) === number so it is backwards-
-   * compatible with all existing UI code that calls parseFloat(result.confidence).
-   */
   confidence: number;
-
-  /** Top-K predictions sorted by probability descending. */
   topK: TopKPrediction[];
+
+  /** Top-1 confidence is below the unsupported threshold — the image likely
+   *  does not belong to any known class. */
+  unsupported: boolean;
 
   /** Sentinel that tells the UI this result came from the on-device model. */
   offlineMode: true;
@@ -103,7 +96,6 @@ export function getTopK(probabilities: Float32Array, k = 3): TopKPrediction[] {
  * @param rawOutput  Output tensor from model.runSync() — shape [NUM_CLASSES].
  */
 export function buildResult(rawOutput: Float32Array): InferenceResult {
-  // Apply softmax in case the model outputs raw logits
   const probabilities = softmax(rawOutput);
   const topK = getTopK(probabilities, 3);
   const best = topK[0];
@@ -113,5 +105,6 @@ export function buildResult(rawOutput: Float32Array): InferenceResult {
     confidence: parseFloat((best.probability * 100).toFixed(2)),
     topK,
     offlineMode: true,
+    unsupported: best.probability < UNSUPPORTED_THRESHOLD,
   };
 }
