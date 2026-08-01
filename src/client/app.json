@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "CropGuardMobile",
-    "slug": "CropGuardMobile",
+    "slug": "cropgard",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -35,8 +35,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "527cc9b2-076d-4d75-80ae-1dc5f9c894fc"
+        "projectId": "61b1813c-31df-4255-aa67-3b7cdeb2dca0"
       }
-    }
+    },
+    "owner": "hassan-ousman"
   }
 }
