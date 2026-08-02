@@ -96,7 +96,14 @@ export function getTopK(probabilities: Float32Array, k = 3): TopKPrediction[] {
  * @param rawOutput  Output tensor from model.runSync() — shape [NUM_CLASSES].
  */
 export function buildResult(rawOutput: Float32Array): InferenceResult {
-  const probabilities = softmax(rawOutput);
+  // The model's final layer is already a Softmax, so `rawOutput` is a valid
+  // probability distribution (sum ≈ 1). Re-applying softmax() would flatten
+  // the confidence and push every prediction below the unsupported threshold,
+  // so only convert logits → probabilities when the output is NOT normalized.
+  const sum = rawOutput.reduce((a, b) => a + b, 0);
+  const probabilities =
+    Math.abs(sum - 1) > 0.01 ? softmax(rawOutput) : rawOutput;
+
   const topK = getTopK(probabilities, 3);
   const best = topK[0];
 

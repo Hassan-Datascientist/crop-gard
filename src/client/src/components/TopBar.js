@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function TopBar({ title, t, modelState, isDark, onToggleTheme, c }) {
   const modelBadge = () => {
@@ -27,13 +28,14 @@ export default function TopBar({ title, t, modelState, isDark, onToggleTheme, c 
         {modelBadge()}
       </View>
       <TouchableOpacity
-        style={[styles.themeBtn, { backgroundColor: c.surfaceAlt, borderColor: c.border }]}
+        style={[
+          styles.themeBtn,
+          { backgroundColor: c.surface, borderColor: c.borderStrong },
+        ]}
         onPress={onToggleTheme}
         activeOpacity={0.7}
       >
-        <Text style={[styles.themeBtnText, { color: c.textMuted }]}>
-          {isDark ? "☀️" : "🌙"}
-        </Text>
+        <Ionicons name={isDark ? "sunny" : "moon"} size={18} color={c.text} />
       </TouchableOpacity>
     </View>
   );
@@ -70,5 +72,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  themeBtnText: { fontSize: 18 },
 });

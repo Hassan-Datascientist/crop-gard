@@ -1,32 +1,29 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Alert, ScrollView, StatusBar, Platform } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StatusBar,
+  Platform,
+} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useInference } from "../ml/useInference";
-import { TRANSLATIONS } from "../constants/translations";
-import { DARK, LIGHT } from "../constants/theme";
+import { useApp } from "../context/AppContext";
 import { DISEASE_DETAILS } from "../constants/diseaseData";
+import { parseDiseaseLabel } from "../utils/parseDiseaseLabel";
 import TopBar from "../components/TopBar";
-import LanguageSelector from "../components/LanguageSelector";
 import ImagePickerSection from "../components/ImagePickerSection";
 import ResultCard from "../components/ResultCard";
 
-function parseDiseaseLabel(rawLabel) {
-  if (!rawLabel) return { crop: "", diseaseName: "Unknown", isHealthy: false };
-  const [crop, ...rest] = rawLabel.split("___");
-  const diseaseName = rest.length ? rest.join(" ").replace(/_/g, " ") : rawLabel;
-  const trimmed = diseaseName.trim();
-  return { crop, diseaseName: trimmed, isHealthy: trimmed.toLowerCase() === "healthy" };
-}
-
 export default function ScanScreen() {
   const [image, setImage] = useState(null);
-  const [lang, setLang] = useState("en");
-  const [isDark, setIsDark] = useState(true);
+  const { t, c, isDark, toggleTheme, addScan } = useApp();
 
   const { modelState, inferring, result, errorMessage, analyze, reset } = useInference();
-
-  const c = isDark ? DARK : LIGHT;
-  const t = TRANSLATIONS[lang];
 
   const handleImagePick = async (useCamera = false) => {
     const permResult = useCamera
@@ -51,6 +48,15 @@ export default function ScanScreen() {
     const inferenceResult = await analyze(image);
     if (!inferenceResult && errorMessage) {
       Alert.alert("Analysis Error", errorMessage || "On-device inference failed.");
+      return;
+    }
+    if (inferenceResult) {
+      await addScan({
+        imageUri: image,
+        disease: inferenceResult.disease,
+        confidence: inferenceResult.confidence,
+        unsupported: inferenceResult.unsupported,
+      });
     }
   };
 
@@ -77,9 +83,7 @@ export default function ScanScreen() {
     <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      <TopBar title={t.title} t={t} modelState={modelState} isDark={isDark} onToggleTheme={() => setIsDark(d => !d)} c={c} />
-
-      <LanguageSelector lang={lang} onSelect={setLang} c={c} />
+      <TopBar title={t.title} t={t} modelState={modelState} isDark={isDark} onToggleTheme={toggleTheme} c={c} />
 
       <Text style={[styles.subtitle, { color: c.textMuted }]}>{t.subtitle}</Text>
 

@@ -1,13 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-
-function parseDiseaseLabel(rawLabel) {
-  if (!rawLabel) return { crop: "", diseaseName: "Unknown", isHealthy: false };
-  const [crop, ...rest] = rawLabel.split("___");
-  const diseaseName = rest.length ? rest.join(" ").replace(/_/g, " ") : rawLabel;
-  const trimmed = diseaseName.trim();
-  return { crop, diseaseName: trimmed, isHealthy: trimmed.toLowerCase() === "healthy" };
-}
+import { Ionicons } from "@expo/vector-icons";
+import { parseDiseaseLabel } from "../utils/parseDiseaseLabel";
 
 export default function ResultCard({ result, t, c }) {
   if (!result) return null;
@@ -21,13 +15,17 @@ export default function ResultCard({ result, t, c }) {
     return (
       <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.warning }]}>
         <View style={[styles.header, { borderBottomColor: c.border }]}>
-          <Text style={[styles.headerText, { color: c.textMuted }]}>📊 {t.report}</Text>
+          <View style={styles.headerRow}>
+            <Ionicons name="stats-chart-outline" size={14} color={c.textMuted} />
+            <Text style={[styles.headerText, { color: c.textMuted }]}>{t.report}</Text>
+          </View>
         </View>
 
         <View style={styles.statusRow}>
           <View style={[styles.badge, { backgroundColor: c.warning + "22" }]}>
+            <Ionicons name="help-circle" size={16} color={c.warning} />
             <Text style={[styles.badgeText, { color: c.warning }]}>
-              ❓ {t.unsupported}
+              {t.unsupported}
             </Text>
           </View>
         </View>
@@ -47,7 +45,10 @@ export default function ResultCard({ result, t, c }) {
         <View style={[styles.divider, { backgroundColor: c.border }]} />
 
         <View style={styles.section}>
-          <Text style={[styles.sectionLabel, { color: c.textMuted }]}>🔬 {t.cause}</Text>
+          <View style={styles.sectionLabelRow}>
+            <Ionicons name="flask-outline" size={13} color={c.textMuted} />
+            <Text style={[styles.sectionLabel, { color: c.textMuted }]}>{t.cause}</Text>
+          </View>
           <Text style={[styles.sectionText, { color: c.text }]}>{result.description || "-"}</Text>
         </View>
       </View>
@@ -57,13 +58,21 @@ export default function ResultCard({ result, t, c }) {
   return (
     <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
       <View style={[styles.header, { borderBottomColor: c.border }]}>
-        <Text style={[styles.headerText, { color: c.textMuted }]}>📊 {t.report}</Text>
+        <View style={styles.headerRow}>
+          <Ionicons name="stats-chart-outline" size={14} color={c.textMuted} />
+          <Text style={[styles.headerText, { color: c.textMuted }]}>{t.report}</Text>
+        </View>
       </View>
 
       <View style={styles.statusRow}>
         <View style={[styles.badge, { backgroundColor: isHealthy ? c.accentSoft : (c.danger + "22") }]}>
+          <Ionicons
+            name={isHealthy ? "checkmark-circle" : "warning"}
+            size={16}
+            color={isHealthy ? c.accentText : c.danger}
+          />
           <Text style={[styles.badgeText, { color: isHealthy ? c.accentText : c.danger }]}>
-            {isHealthy ? "✅" : "⚠️"} {diseaseName}
+            {diseaseName}
           </Text>
         </View>
       </View>
@@ -83,13 +92,19 @@ export default function ResultCard({ result, t, c }) {
       <View style={[styles.divider, { backgroundColor: c.border }]} />
 
       <View style={styles.section}>
-        <Text style={[styles.sectionLabel, { color: c.textMuted }]}>🔬 {t.cause}</Text>
+        <View style={styles.sectionLabelRow}>
+          <Ionicons name="flask-outline" size={13} color={c.textMuted} />
+          <Text style={[styles.sectionLabel, { color: c.textMuted }]}>{t.cause}</Text>
+        </View>
         <Text style={[styles.sectionText, { color: c.text }]}>{result.description || "-"}</Text>
       </View>
 
       {!isHealthy && (
         <View style={[styles.section, styles.treatmentBox, { backgroundColor: c.accentSoft, borderColor: c.accent }]}>
-          <Text style={[styles.sectionLabel, { color: c.accent }]}>🌿 {t.treatment}</Text>
+          <View style={styles.sectionLabelRow}>
+            <Ionicons name="leaf" size={13} color={c.accent} />
+            <Text style={[styles.sectionLabel, { color: c.accent }]}>{t.treatment}</Text>
+          </View>
           <Text style={[styles.sectionText, { color: c.text }]}>{result.recommendation || "-"}</Text>
         </View>
       )}
@@ -111,9 +126,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   headerText: { fontSize: 12, fontWeight: "700", letterSpacing: 0.8, textTransform: "uppercase" },
+  headerRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   statusRow: { padding: 16, paddingBottom: 8 },
   badge: {
     alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 10,
@@ -136,5 +155,6 @@ const styles = StyleSheet.create({
     margin: 0,
   },
   sectionLabel: { fontSize: 11, fontWeight: "700", letterSpacing: 0.8, textTransform: "uppercase" },
+  sectionLabelRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   sectionText: { fontSize: 14, lineHeight: 21 },
 });

@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ImagePickerSection({ image, t, c, onPick }) {
   return (
@@ -13,7 +14,7 @@ export default function ImagePickerSection({ image, t, c, onPick }) {
           <Image source={{ uri: image }} style={styles.previewImg} resizeMode="cover" />
         ) : (
           <View style={styles.previewEmpty}>
-            <Text style={[styles.previewIcon, { color: c.textFaint }]}>📷</Text>
+            <Ionicons name="image-outline" size={36} color={c.textFaint} />
             <Text style={[styles.previewHint, { color: c.textMuted }]}>{t.placeholder}</Text>
             <Text style={[styles.previewTap, { color: c.accent }]}>Tap to select</Text>
           </View>
@@ -27,14 +28,20 @@ export default function ImagePickerSection({ image, t, c, onPick }) {
             onPress={() => onPick(false)}
             activeOpacity={0.75}
           >
-            <Text style={[styles.secondaryBtnText, { color: c.text }]}>🖼️ {t.gallery}</Text>
+            <View style={styles.btnIconWrap}>
+              <Ionicons name="images-outline" size={17} color={c.textMuted} />
+              <Text style={[styles.secondaryBtnText, { color: c.text }]}>{t.gallery}</Text>
+            </View>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.secondaryBtn, { backgroundColor: c.surface, borderColor: c.border }]}
             onPress={() => onPick(true)}
             activeOpacity={0.75}
           >
-            <Text style={[styles.secondaryBtnText, { color: c.text }]}>📷 {t.camera}</Text>
+            <View style={styles.btnIconWrap}>
+              <Ionicons name="camera-outline" size={17} color={c.textMuted} />
+              <Text style={[styles.secondaryBtnText, { color: c.text }]}>{t.camera}</Text>
+            </View>
           </TouchableOpacity>
         </View>
       )}
@@ -58,7 +65,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
   },
-  previewIcon: { fontSize: 36, marginBottom: 4 },
   previewHint: { fontSize: 14, fontWeight: "500" },
   previewTap: { fontSize: 12, fontWeight: "600" },
   btnRow: { flexDirection: "row", gap: 10, marginBottom: 12 },
@@ -70,5 +76,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  btnIconWrap: { flexDirection: "row", alignItems: "center", gap: 6 },
   secondaryBtnText: { fontSize: 14, fontWeight: "600" },
 });

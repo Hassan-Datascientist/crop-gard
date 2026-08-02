@@ -31,7 +31,9 @@
         {
           "enableCoreMLDelegate": true
         }
-      ]
+      ],
+      "expo-sqlite",
+      "expo-font"
     ],
     "extra": {
       "eas": {
