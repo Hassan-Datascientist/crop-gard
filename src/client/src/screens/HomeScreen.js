@@ -48,7 +48,7 @@ export default function HomeScreen({ navigation }) {
       showsVerticalScrollIndicator={false}
     >
       <View style={[styles.header, { borderBottomColor: c.border }]}>
-        <View>
+        <View style={styles.headerInfo}>
           <Text style={[styles.appName, { color: c.textMuted }]}>
             {t.appName}
           </Text>
@@ -63,6 +63,13 @@ export default function HomeScreen({ navigation }) {
             {t.homeSubtitle}
           </Text>
         </View>
+        {user?.avatar_url ? (
+          <Image source={{ uri: user.avatar_url }} style={[styles.avatar, { borderColor: c.border }]} />
+        ) : (
+          <View style={[styles.avatar, styles.avatarFallback, { backgroundColor: c.surfaceAlt, borderColor: c.border }]}>
+            <Ionicons name="person" size={20} color={c.textMuted} />
+          </View>
+        )}
       </View>
 
       <Text style={[styles.sectionLabel, { color: c.textMuted }]}>
@@ -183,11 +190,26 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     paddingBottom: 18,
     borderBottomWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
   },
+  headerInfo: { flex: 1 },
   appName: { fontSize: 12, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase" },
   greeting: { fontSize: 24, fontWeight: "700", letterSpacing: -0.4, marginTop: 4 },
   greetingRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   subtitle: { fontSize: 13, marginTop: 6 },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+  },
+  avatarFallback: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
   sectionLabel: {
     fontSize: 12,
     fontWeight: "700",

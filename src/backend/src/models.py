@@ -30,6 +30,8 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     salt: Mapped[str] = mapped_column(String(64), nullable=False)
     language_pref: Mapped[str] = mapped_column(String(8), nullable=False, default="en")
+    # Cloudinary (or local) storage id for the profile picture.
+    avatar_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

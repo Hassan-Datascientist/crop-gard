@@ -72,6 +72,8 @@ class UserOut(BaseModel):
     last_name: str
     email: str
     language_pref: str
+    avatar_key: Optional[str] = None
+    avatar_url: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 

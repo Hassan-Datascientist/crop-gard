@@ -6,22 +6,27 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Image,
   Platform,
 } from "react-native";
 import { useApp } from "../context/AppContext";
 import { Ionicons } from "@expo/vector-icons";
 import LanguageSelector from "../components/LanguageSelector";
 
-function Row({ label, value, icon, c, onPress, danger }) {
+function Row({ label, value, icon, avatarUri, c, onPress, danger }) {
   return (
     <TouchableOpacity
       style={[styles.row, { backgroundColor: c.surface, borderColor: c.border }]}
       onPress={onPress}
       activeOpacity={0.75}
     >
-      <View style={[styles.rowIcon, { backgroundColor: danger ? c.danger + "22" : c.accentSoft }]}>
-        <Ionicons name={icon} size={17} color={danger ? c.danger : c.accentText} />
-      </View>
+      {avatarUri ? (
+        <Image source={{ uri: avatarUri }} style={[styles.avatar, { borderColor: c.border }]} />
+      ) : (
+        <View style={[styles.rowIcon, { backgroundColor: danger ? c.danger + "22" : c.accentSoft }]}>
+          <Ionicons name={icon} size={17} color={danger ? c.danger : c.accentText} />
+        </View>
+      )}
       <Text style={[styles.rowLabel, { color: danger ? c.danger : c.text }]}>
         {label}
       </Text>
@@ -53,6 +58,7 @@ export default function SettingsScreen({ navigation }) {
       <Row
         label={t.editProfile}
         icon="person-outline"
+        avatarUri={user?.avatar_url}
         value={`${user?.first_name || ""} ${user?.last_name || ""}`}
         c={c}
         onPress={() => navigation.navigate("EditProfile")}
@@ -115,6 +121,12 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     alignItems: "center",
     justifyContent: "center",
+  },
+  avatar: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 1,
   },
   rowLabel: { flex: 1, fontSize: 15, fontWeight: "600" },
   rowValue: { fontSize: 13 },

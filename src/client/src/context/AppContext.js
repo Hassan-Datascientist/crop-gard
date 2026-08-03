@@ -23,6 +23,8 @@ import {
   saveScan,
   getLocalScans,
   setScanImageKey,
+  deleteScan,
+  updateUserAvatar,
   upsertScansFromServer,
   upsertLocalUser,
 } from "../db/database";
@@ -250,6 +252,34 @@ export function AppProvider({ children }) {
     [user, syncNow],
   );
 
+  const removeScan = useCallback(
+    async (uuid) => {
+      if (!user) return;
+      await deleteScan(user.id, uuid);
+      syncNow();
+    },
+    [user, syncNow],
+  );
+
+  const updateAvatar = useCallback(
+    async (uri) => {
+      if (!user) return null;
+      const up = await api.uploadAvatarApi(token, uri);
+      const u = await updateUserAvatar(user.id, up.avatar_key, up.avatar_url);
+      setUser(u);
+      return u;
+    },
+    [user, token],
+  );
+
+  const removeAvatar = useCallback(async () => {
+    if (!user) return null;
+    await api.removeAvatarApi(token);
+    const u = await updateUserAvatar(user.id, null, null);
+    setUser(u);
+    return u;
+  }, [user, token]);
+
   const toggleTheme = useCallback(() => setIsDark((d) => !d), []);
 
   const lang = user?.language_pref || "en";
@@ -269,6 +299,9 @@ export function AppProvider({ children }) {
       changePassword,
       setLanguage,
       addScan,
+      removeScan,
+      updateAvatar,
+      removeAvatar,
       syncNow,
       toggleTheme,
     };
@@ -284,6 +317,9 @@ export function AppProvider({ children }) {
     changePassword,
     setLanguage,
     addScan,
+    removeScan,
+    updateAvatar,
+    removeAvatar,
     syncNow,
     toggleTheme,
   ]);

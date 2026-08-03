@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,6 +22,7 @@ from ..security import (
     hash_password,
     verify_password,
 )
+from ..storage import public_url, store_image
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -30,8 +31,23 @@ _UNAUTHORIZED = HTTPException(
 )
 
 
+def _user_out(user: User) -> UserOut:
+    return UserOut(
+        id=user.id,
+        uuid=user.uuid,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        email=user.email,
+        language_pref=user.language_pref,
+        avatar_key=user.avatar_key,
+        avatar_url=public_url(user.avatar_key) if user.avatar_key else None,
+        created_at=user.created_at,
+        updated_at=user.updated_at,
+    )
+
+
 def _token_for(user: User) -> TokenResponse:
-    return TokenResponse(token=create_access_token(user.id), user=UserOut.model_validate(user))
+    return TokenResponse(token=create_access_token(user.id), user=_user_out(user))
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
@@ -69,7 +85,7 @@ async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)):
 
 @router.get("/me", response_model=UserOut)
 async def me(user: User = Depends(get_current_user)):
-    return user
+    return _user_out(user)
 
 
 @router.patch("/me", response_model=UserOut)
@@ -94,7 +110,37 @@ async def update_me(
     user.updated_at = datetime.now(timezone.utc)
     await db.commit()
     await db.refresh(user)
-    return user
+    return _user_out(user)
+
+
+@router.post("/avatar", response_model=UserOut)
+async def upload_avatar(
+    file: UploadFile = File(...),
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty file")
+
+    avatar_key, _ = await store_image(content)
+    user.avatar_key = avatar_key
+    user.updated_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(user)
+    return _user_out(user)
+
+
+@router.delete("/avatar", response_model=UserOut)
+async def remove_avatar(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    user.avatar_key = None
+    user.updated_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(user)
+    return _user_out(user)
 
 
 @router.post("/change-password", status_code=status.HTTP_204_NO_CONTENT)

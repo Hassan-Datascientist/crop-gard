@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
+  Alert,
   Platform,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
@@ -16,7 +17,7 @@ import { parseDiseaseLabel } from "../utils/parseDiseaseLabel";
 import { formatDate } from "../utils/formatDate";
 
 export default function HistoryScreen({ navigation }) {
-  const { user, t, c, lang } = useApp();
+  const { user, t, c, lang, removeScan } = useApp();
   const [scans, setScans] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,6 +37,17 @@ export default function HistoryScreen({ navigation }) {
       };
     }, [user]),
   );
+
+  const confirmDelete = (item) => {
+    Alert.alert(t.deleteScan, t.deleteScanConfirm, [
+      { text: t.cancel, style: "cancel" },
+      {
+        text: t.deleteScan,
+        style: "destructive",
+        onPress: () => removeScan(item.uuid),
+      },
+    ]);
+  };
 
   const renderItem = ({ item }) => {
     const { diseaseName, isHealthy } = parseDiseaseLabel(item.disease);
@@ -85,6 +97,13 @@ export default function HistoryScreen({ navigation }) {
                   {item.unsupported ? t.diseaseUnsupported : diseaseName}
                 </Text>
               </View>
+              <TouchableOpacity
+                onPress={() => confirmDelete(item)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                activeOpacity={0.6}
+              >
+                <Ionicons name="trash-outline" size={18} color={c.textFaint} />
+              </TouchableOpacity>
             </View>
             <View style={styles.bottomRow}>
               <Text style={[styles.confidence, { color: c.text }]}>
@@ -163,7 +182,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   info: { flex: 1 },
-  topRow: { flexDirection: "row" },
+  topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   badge: { alignSelf: "flex-start", paddingHorizontal: 9, paddingVertical: 4, borderRadius: 7 },
   badgeText: { fontSize: 12, fontWeight: "700" },
   bottomRow: {

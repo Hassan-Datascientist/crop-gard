@@ -28,6 +28,8 @@ export async function initDB() {
       password_hash TEXT NOT NULL,
       salt TEXT NOT NULL,
       language_pref TEXT NOT NULL DEFAULT 'en',
+      avatar_key TEXT,
+      avatar_url TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT
     );
@@ -65,6 +67,8 @@ export async function initDB() {
 
   await ensureColumn("users", "uuid", "uuid TEXT");
   await ensureColumn("users", "updated_at", "updated_at TEXT");
+  await ensureColumn("users", "avatar_key", "avatar_key TEXT");
+  await ensureColumn("users", "avatar_url", "avatar_url TEXT");
   await ensureColumn("scans", "uuid", "uuid TEXT");
   await ensureColumn("scans", "image_key", "image_key TEXT");
   await ensureColumn("scans", "image_url", "image_url TEXT");
@@ -173,7 +177,8 @@ export async function upsertLocalUser({ serverUser, password }) {
   if (existing) {
     await d.runAsync(
       `UPDATE users SET uuid = ?, first_name = ?, last_name = ?,
-         language_pref = ?, password_hash = ?, salt = ?, updated_at = ?
+         language_pref = ?, password_hash = ?, salt = ?,
+         avatar_key = ?, avatar_url = ?, updated_at = ?
        WHERE id = ?`,
       [
         serverUser.uuid || existing.uuid,
@@ -182,6 +187,8 @@ export async function upsertLocalUser({ serverUser, password }) {
         serverUser.language_pref || existing.language_pref,
         passwordHash,
         salt,
+        serverUser.avatar_key || existing.avatar_key || null,
+        serverUser.avatar_url || existing.avatar_url || null,
         nowIso(),
         existing.id,
       ],
@@ -190,8 +197,8 @@ export async function upsertLocalUser({ serverUser, password }) {
   }
 
   const res = await d.runAsync(
-    `INSERT INTO users (uuid, first_name, last_name, email, password_hash, salt, language_pref, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO users (uuid, first_name, last_name, email, password_hash, salt, language_pref, avatar_key, avatar_url, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       serverUser.uuid,
       serverUser.first_name,
@@ -200,6 +207,8 @@ export async function upsertLocalUser({ serverUser, password }) {
       passwordHash,
       salt,
       serverUser.language_pref || "en",
+      serverUser.avatar_key || null,
+      serverUser.avatar_url || null,
       nowIso(),
       nowIso(),
     ],
@@ -306,6 +315,17 @@ export async function updateUserLanguage(id, language) {
   return getUserById(id);
 }
 
+export async function updateUserAvatar(id, avatarKey, avatarUrl) {
+  const d = await initDB();
+  await d.runAsync("UPDATE users SET avatar_key = ?, avatar_url = ?, updated_at = ? WHERE id = ?", [
+    avatarKey,
+    avatarUrl,
+    nowIso(),
+    id,
+  ]);
+  return getUserById(id);
+}
+
 // ─── Scan history ────────────────────────────────────────────────────────────
 
 export async function saveScan(userId, scan) {
@@ -372,6 +392,15 @@ export async function setScanImageKey(uuid, imageKey, imageUrl) {
     imageUrl,
     uuid,
   ]);
+}
+
+export async function deleteScan(userId, uuid) {
+  const d = await initDB();
+  const ts = nowIso();
+  await d.runAsync(
+    "UPDATE scans SET deleted_at = ?, updated_at = ? WHERE user_id = ? AND uuid = ? AND deleted_at IS NULL",
+    [ts, ts, userId, uuid],
+  );
 }
 
 export async function upsertScansFromServer(userId, scans) {
