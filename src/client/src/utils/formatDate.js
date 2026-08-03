@@ -1,16 +1,15 @@
 export function formatDate(iso, lang = "en") {
   if (!iso) return "";
-  try {
-    const d = new Date(String(iso).replace(" ", "T") + "Z");
-    return d.toLocaleDateString(lang === "ar" ? "ar-EG" : lang, {
-      day: "numeric",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return String(iso);
-  }
+  const raw = String(iso).replace(" ", "T");
+  const hasTz = /Z$|[+-]\d{2}:?\d{2}$/.test(raw);
+  const d = new Date(hasTz ? raw : raw + "Z");
+  if (Number.isNaN(d.getTime())) return String(iso);
+  return d.toLocaleDateString(lang === "ar" ? "ar-EG" : lang, {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export function getGreetingKey(date = new Date()) {
