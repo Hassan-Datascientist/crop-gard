@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -14,6 +15,19 @@ class Setting(BaseSettings):
     cloudinary_api_key: str | None = None
     cloudinary_secret: str | None = None
     cloudinary_folder: str = "cropgard"
+
+    @field_validator("database_url")
+    @classmethod
+    def _ensure_async_driver(cls, v: str) -> str:
+        """Render DATABASE_URL is `postgresql://` (psycopg2); force asyncpg."""
+        if v.startswith("postgres://"):
+            v = "postgresql://" + v[len("postgres://") :]
+        if v.startswith("postgresql://"):
+            v = "postgresql+asyncpg://" + v[len("postgresql://") :]
+        for sslmode in ("verify-full", "verify-ca", "require", "prefer", "allow", "disable"):
+            v = v.replace(f"?sslmode={sslmode}", f"?ssl={sslmode}")
+            v = v.replace(f"&sslmode={sslmode}", f"&ssl={sslmode}")
+        return v
 
     @property
     def cloudinary_enabled(self) -> bool:
