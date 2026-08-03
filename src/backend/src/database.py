@@ -34,6 +34,21 @@ async def init_db() -> None:
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(_ensure_columns)
+
+
+def _ensure_columns(sync_conn) -> None:
+    """Lightweight migration for columns added after a table already exists."""
+    existing = {
+        row[0]
+        for row in sync_conn.exec_driver_sql(
+            "SELECT column_name FROM information_schema.columns WHERE table_name = 'users'"
+        ).fetchall()
+    }
+    if "avatar_key" not in existing:
+        sync_conn.exec_driver_sql(
+            "ALTER TABLE users ADD COLUMN avatar_key VARCHAR(64)"
+        )
 
 
 async def get_db() -> AsyncIterator[AsyncSession]:
