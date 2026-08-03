@@ -42,9 +42,9 @@ export default function HistoryScreen({ navigation }) {
     return (
       <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
         <View style={styles.row}>
-          {item.image_uri ? (
+          {item.image_url || item.image_uri ? (
             <Image
-              source={{ uri: item.image_uri }}
+              source={{ uri: item.image_url || item.image_uri }}
               style={[styles.thumb, { backgroundColor: c.surfaceAlt, borderColor: c.border }]}
               resizeMode="cover"
             />

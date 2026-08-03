@@ -82,9 +82,9 @@ export default function HomeScreen({ navigation }) {
           activeOpacity={0.8}
         >
           <View style={styles.cardRow}>
-            {lastScan.image_uri ? (
+            {lastScan.image_url || lastScan.image_uri ? (
               <Image
-                source={{ uri: lastScan.image_uri }}
+                source={{ uri: lastScan.image_url || lastScan.image_uri }}
                 style={[styles.thumb, { backgroundColor: c.surfaceAlt, borderColor: c.border }]}
                 resizeMode="cover"
               />
