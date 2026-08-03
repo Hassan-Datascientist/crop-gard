@@ -44,7 +44,10 @@ export default function HistoryScreen({ navigation }) {
       {
         text: t.deleteScan,
         style: "destructive",
-        onPress: () => removeScan(item.uuid),
+        onPress: () => {
+          setScans((prev) => prev.filter((s) => s.uuid !== item.uuid));
+          removeScan(item.uuid);
+        },
       },
     ]);
   };

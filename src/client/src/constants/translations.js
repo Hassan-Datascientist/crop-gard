@@ -98,6 +98,9 @@ export const TRANSLATIONS = {
     confirmNewPassword: "Confirm new password",
     changePhoto: "Change Photo",
     removePhoto: "Remove Photo",
+    removePhotoConfirm: "Remove your profile photo?",
+    permissionRequired: "Permission Required",
+    permissionDenied: "Please allow camera or gallery access to continue.",
     networkError: "Network error. Please check your connection.",
 
     scanHistory: "Scan History",
@@ -204,6 +207,9 @@ export const TRANSLATIONS = {
     confirmNewPassword: "Emeza ijambobanga rishya",
     changePhoto: "Hindura Ifoto",
     removePhoto: "Kuraho Ifoto",
+    removePhotoConfirm: "Kuraho ifoto yawe?",
+    permissionRequired: "Urupapuro Rirakenewe",
+    permissionDenied: "Nyamuneka emera kamera cyangwa amafoto kugira ngo ukomeze.",
     networkError: "Ikosa rya interineti. Gerageza ukonnecte neza.",
 
     scanHistory: "Amateka y'isuzuma",
@@ -310,6 +316,9 @@ export const TRANSLATIONS = {
     confirmNewPassword: "Confirmer le nouveau mot de passe",
     changePhoto: "Changer de photo",
     removePhoto: "Supprimer la photo",
+    removePhotoConfirm: "Supprimer votre photo de profil ?",
+    permissionRequired: "Autorisation requise",
+    permissionDenied: "Veuillez autoriser l'accès à l'appareil photo ou à la galerie pour continuer.",
     networkError: "Erreur réseau. Vérifiez votre connexion.",
 
     scanHistory: "Historique des analyses",
@@ -416,6 +425,9 @@ export const TRANSLATIONS = {
     confirmNewPassword: "تأكيد كلمة المرور الجديدة",
     changePhoto: "تغيير الصورة",
     removePhoto: "إزالة الصورة",
+    removePhotoConfirm: "إزالة صورة ملفك الشخصي؟",
+    permissionRequired: "الإذن مطلوب",
+    permissionDenied: "يرجى السماح بالوصول إلى الكاميرا أو معرض الصور للمتابعة.",
     networkError: "خطأ في الشبكة. تحقق من اتصالك.",
 
     scanHistory: "سجل الفحوصات",

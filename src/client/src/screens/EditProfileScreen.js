@@ -54,7 +54,7 @@ export default function EditProfileScreen({ navigation }) {
       ? await ImagePicker.requestCameraPermissionsAsync()
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permResult.status !== "granted") {
-      Alert.alert(t.settings, t.networkError);
+      Alert.alert(t.permissionRequired, t.permissionDenied);
       return;
     }
     const options = { allowsEditing: true, aspect: [1, 1], quality: 0.92 };
@@ -81,7 +81,7 @@ export default function EditProfileScreen({ navigation }) {
   };
 
   const handleRemovePhoto = () => {
-    Alert.alert(t.removePhoto, t.deleteScanConfirm, [
+    Alert.alert(t.removePhoto, t.removePhotoConfirm, [
       { text: t.cancel, style: "cancel" },
       {
         text: t.removePhoto,
