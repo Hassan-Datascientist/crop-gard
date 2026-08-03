@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "cropgard",
-    "slug": "cropgard",
+    "name": "CropGuardMobile",
+    "slug": "CropGuardMobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
