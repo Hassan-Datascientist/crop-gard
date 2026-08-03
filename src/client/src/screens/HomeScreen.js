@@ -39,7 +39,7 @@ export default function HomeScreen({ navigation }) {
 
   const firstName = user?.first_name || "";
   const greeting = t[getGreetingKey()];
-  const { diseaseName, isHealthy } = parseDiseaseLabel(lastScan?.disease);
+  const { friendlyLabel, isHealthy } = parseDiseaseLabel(lastScan?.disease, lang);
 
   return (
     <ScrollView
@@ -85,7 +85,7 @@ export default function HomeScreen({ navigation }) {
       ) : lastScan ? (
         <TouchableOpacity
           style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}
-          onPress={() => navigation.navigate("QuickAction")}
+          onPress={() => navigation.navigate("ScanDetail", { scan: lastScan })}
           activeOpacity={0.8}
         >
           <View style={styles.cardRow}>
@@ -129,7 +129,7 @@ export default function HomeScreen({ navigation }) {
                       },
                     ]}
                   >
-                    {lastScan.unsupported ? t.diseaseUnsupported : diseaseName}
+                    {lastScan.unsupported ? t.diseaseUnsupported : friendlyLabel}
                   </Text>
                 </View>
                 <Text style={[styles.confidence, { color: c.text }]}>

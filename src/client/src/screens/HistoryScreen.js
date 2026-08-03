@@ -53,9 +53,13 @@ export default function HistoryScreen({ navigation }) {
   };
 
   const renderItem = ({ item }) => {
-    const { diseaseName, isHealthy } = parseDiseaseLabel(item.disease);
+    const { friendlyLabel, isHealthy } = parseDiseaseLabel(item.disease, lang);
     return (
-      <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
+      <TouchableOpacity
+        style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}
+        onPress={() => navigation.navigate("ScanDetail", { scan: item })}
+        activeOpacity={0.7}
+      >
         <View style={styles.row}>
           {item.image_url || item.image_uri ? (
             <Image
@@ -97,7 +101,7 @@ export default function HistoryScreen({ navigation }) {
                     },
                   ]}
                 >
-                  {item.unsupported ? t.diseaseUnsupported : diseaseName}
+                  {item.unsupported ? t.diseaseUnsupported : friendlyLabel}
                 </Text>
               </View>
               <TouchableOpacity
@@ -117,8 +121,9 @@ export default function HistoryScreen({ navigation }) {
               </Text>
             </View>
           </View>
+          <Ionicons name="chevron-forward" size={16} color={c.textFaint} />
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 

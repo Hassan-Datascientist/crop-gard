@@ -3,11 +3,11 @@ import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { parseDiseaseLabel } from "../utils/parseDiseaseLabel";
 
-export default function ResultCard({ result, t, c }) {
+export default function ResultCard({ result, t, c, lang = "en" }) {
   if (!result) return null;
 
   const { disease, confidence, unsupported } = result;
-  const { diseaseName, isHealthy } = parseDiseaseLabel(disease);
+  const { friendlyLabel, isHealthy } = parseDiseaseLabel(disease, lang);
   const confidenceNum = parseFloat(String(confidence ?? 0));
   const confidenceColor = confidenceNum >= 80 ? c.accent : confidenceNum >= 55 ? c.warning : c.danger;
 
@@ -72,7 +72,7 @@ export default function ResultCard({ result, t, c }) {
             color={isHealthy ? c.accentText : c.danger}
           />
           <Text style={[styles.badgeText, { color: isHealthy ? c.accentText : c.danger }]}>
-            {diseaseName}
+            {friendlyLabel}
           </Text>
         </View>
       </View>

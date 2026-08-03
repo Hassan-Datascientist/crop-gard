@@ -21,7 +21,7 @@ import ResultCard from "../components/ResultCard";
 
 export default function ScanScreen() {
   const [image, setImage] = useState(null);
-  const { t, c, isDark, toggleTheme, addScan } = useApp();
+  const { t, c, lang, isDark, toggleTheme, addScan } = useApp();
 
   const { modelState, inferring, result, errorMessage, analyze, reset } = useInference();
 
@@ -60,16 +60,21 @@ export default function ScanScreen() {
     }
   };
 
-  const getRemedy = (name, unsupported) => {
-    if (unsupported) return DISEASE_DETAILS.en.unknown || { cause: "-", treatment: "-" };
-    const key = name?.toLowerCase().trim() || "healthy";
-    return DISEASE_DETAILS.en[key] || { cause: "-", treatment: "-" };
+  const getRemedy = (rawLabel, unsupported) => {
+    if (unsupported) {
+      return DISEASE_DETAILS[lang]?.unknown || DISEASE_DETAILS.en.unknown;
+    }
+    const key = parseDiseaseLabel(rawLabel, lang).detailKey || "healthy";
+    return (
+      DISEASE_DETAILS[lang]?.[key] ||
+      DISEASE_DETAILS.en[key] ||
+      DISEASE_DETAILS.en.unknown || { cause: "-", treatment: "-" }
+    );
   };
 
   const getResultWithDetails = () => {
     if (!result) return null;
-    const { diseaseName } = parseDiseaseLabel(result.disease);
-    const remedy = getRemedy(diseaseName, result.unsupported);
+    const remedy = getRemedy(result.disease, result.unsupported);
     return {
       ...result,
       description: remedy.cause,
@@ -114,7 +119,7 @@ export default function ScanScreen() {
         </TouchableOpacity>
       )}
 
-      <ResultCard result={getResultWithDetails()} t={t} c={c} />
+      <ResultCard result={getResultWithDetails()} t={t} c={c} lang={lang} />
 
       <View style={styles.bottomSpacer} />
     </ScrollView>

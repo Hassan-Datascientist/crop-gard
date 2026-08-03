@@ -105,6 +105,8 @@ export const TRANSLATIONS = {
 
     scanHistory: "Scan History",
     historyEmpty: "No scans yet. Scan a crop to see the history here.",
+    scanDetails: "Scan Details",
+    scannedOn: "Scanned on",
     deleteScan: "Delete",
     deleteScanConfirm: "Delete this scan? This action cannot be undone.",
     diseaseHealthy: "Healthy",
@@ -214,6 +216,8 @@ export const TRANSLATIONS = {
 
     scanHistory: "Amateka y'isuzuma",
     historyEmpty: "Nta byisuzuma biriho. Suzuma igihingwa urebe amateka hano.",
+    scanDetails: "Ibisobanuro by'Isuzuma",
+    scannedOn: "Isuzumwe ku",
     deleteScan: "Siba",
     deleteScanConfirm: "Siba iri suzuma? Ibi ntibishobora gusubizwa.",
     diseaseHealthy: "Nziza",
@@ -323,6 +327,8 @@ export const TRANSLATIONS = {
 
     scanHistory: "Historique des analyses",
     historyEmpty: "Aucune analyse. Analysez une culture pour voir l'historique.",
+    scanDetails: "Détails de l'analyse",
+    scannedOn: "Analysé le",
     deleteScan: "Supprimer",
     deleteScanConfirm: "Supprimer cette analyse ? Cette action est irréversible.",
     diseaseHealthy: "Saine",
@@ -432,6 +438,8 @@ export const TRANSLATIONS = {
 
     scanHistory: "سجل الفحوصات",
     historyEmpty: "لا توجد فحوصات بعد. افحص محصولاً لعرض السجل هنا.",
+    scanDetails: "تفاصيل الفحص",
+    scannedOn: "تم الفحص في",
     deleteScan: "حذف",
     deleteScanConfirm: "حذف هذا الفحص؟ لا يمكن التراجع عن هذا الإجراء.",
     diseaseHealthy: "سليم",
