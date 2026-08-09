@@ -2,80 +2,130 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function ImagePickerSection({ image, t, c, onPick }) {
-  return (
-    <>
-      <TouchableOpacity
-        style={[styles.preview, { backgroundColor: c.surfaceAlt, borderColor: image ? c.accent : c.border }]}
-        onPress={() => onPick(false)}
-        activeOpacity={0.85}
-      >
-        {image ? (
-          <Image source={{ uri: image }} style={styles.previewImg} resizeMode="cover" />
-        ) : (
-          <View style={styles.previewEmpty}>
-            <Ionicons name="image-outline" size={36} color={c.textFaint} />
-            <Text style={[styles.previewHint, { color: c.textMuted }]}>{t.placeholder}</Text>
-            <Text style={[styles.previewTap, { color: c.accent }]}>Tap to select</Text>
+// LeafDropzone replica: dashed 4:3 box with icon tile, title, subtitle and
+// Upload Image / Take Photo buttons.
+export default function ImagePickerSection({ image, t, c, onPick, busy }) {
+  if (image) {
+    return (
+      <View style={[styles.preview, { backgroundColor: c.surfaceAlt, borderColor: c.border }]}>
+        <Image source={{ uri: image }} style={styles.previewImg} resizeMode="cover" />
+        {busy ? (
+          <View style={styles.loadingOverlay}>
+            <Ionicons name="sparkles" size={22} color="#FFFFFF" />
+            <Text style={styles.loadingText}>{t.modelLoading}</Text>
           </View>
-        )}
-      </TouchableOpacity>
+        ) : null}
+        <TouchableOpacity
+          style={[styles.clearBtn, { backgroundColor: c.surface, borderColor: c.border }]}
+          onPress={() => onPick(null)}
+          activeOpacity={0.7}
+          accessibilityLabel="Clear image"
+        >
+          <Ionicons name="close" size={16} color={c.text} />
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
-      {!image && (
-        <View style={styles.btnRow}>
-          <TouchableOpacity
-            style={[styles.secondaryBtn, { backgroundColor: c.surface, borderColor: c.border }]}
-            onPress={() => onPick(false)}
-            activeOpacity={0.75}
-          >
-            <View style={styles.btnIconWrap}>
-              <Ionicons name="images-outline" size={17} color={c.textMuted} />
-              <Text style={[styles.secondaryBtnText, { color: c.text }]}>{t.gallery}</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.secondaryBtn, { backgroundColor: c.surface, borderColor: c.border }]}
-            onPress={() => onPick(true)}
-            activeOpacity={0.75}
-          >
-            <View style={styles.btnIconWrap}>
-              <Ionicons name="camera-outline" size={17} color={c.textMuted} />
-              <Text style={[styles.secondaryBtnText, { color: c.text }]}>{t.camera}</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-      )}
-    </>
+  return (
+    <View style={[styles.dropzone, { backgroundColor: c.surfaceAlt, borderColor: c.border }]}>
+      <View style={[styles.iconTile, { backgroundColor: c.accentSoft }]}>
+        <Ionicons name="leaf" size={28} color={c.accentText} />
+      </View>
+      <Text style={[styles.title, { color: c.text }]}>{t.dropzoneTitle}</Text>
+      <Text style={[styles.subtitle, { color: c.textMuted }]}>{t.dropzoneHint}</Text>
+
+      <View style={styles.btnRow}>
+        <TouchableOpacity
+          style={[styles.primaryBtn, { backgroundColor: c.accent }]}
+          onPress={() => onPick(false)}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="image" size={16} color={c.primaryForeground || "#FFFFFF"} />
+          <Text style={[styles.primaryBtnText, { color: c.primaryForeground || "#FFFFFF" }]}>
+            {t.gallery}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.outlineBtn, { backgroundColor: c.surface, borderColor: c.border }]}
+          onPress={() => onPick(true)}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="camera" size={16} color={c.text} />
+          <Text style={[styles.outlineBtnText, { color: c.text }]}>{t.camera}</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  preview: {
-    width: "100%",
-    height: 260,
+  dropzone: {
     borderRadius: 16,
     borderWidth: 1.5,
-    overflow: "hidden",
-    marginBottom: 14,
+    borderStyle: "dashed",
+    paddingVertical: 40,
+    paddingHorizontal: 24,
+    alignItems: "center",
+    gap: 10,
   },
-  previewImg: { width: "100%", height: "100%" },
-  previewEmpty: {
-    flex: 1,
+  iconTile: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
+    marginBottom: 4,
   },
-  previewHint: { fontSize: 14, fontWeight: "500" },
-  previewTap: { fontSize: 12, fontWeight: "600" },
-  btnRow: { flexDirection: "row", gap: 10, marginBottom: 12 },
-  secondaryBtn: {
+  title: { fontSize: 17, fontWeight: "600", textAlign: "center" },
+  subtitle: { fontSize: 13, textAlign: "center", lineHeight: 19, marginBottom: 8 },
+  btnRow: { flexDirection: "row", gap: 10, alignSelf: "stretch" },
+  primaryBtn: {
     flex: 1,
-    paddingVertical: 13,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    minHeight: 48,
     borderRadius: 12,
+  },
+  primaryBtnText: { fontSize: 14, fontWeight: "600" },
+  outlineBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    minHeight: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  outlineBtnText: { fontSize: 14, fontWeight: "600" },
+  preview: {
+    width: "100%",
+    aspectRatio: 4 / 3,
+    borderRadius: 16,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  previewImg: { width: "100%", height: "100%" },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  loadingText: { color: "#FFFFFF", fontSize: 13, fontWeight: "600" },
+  clearBtn: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-  btnIconWrap: { flexDirection: "row", alignItems: "center", gap: 6 },
-  secondaryBtnText: { fontSize: 14, fontWeight: "600" },
 });

@@ -9,6 +9,7 @@ export default function PrimaryButton({
   c,
   style,
 }) {
+  const fg = c.primaryForeground || "#FFFFFF";
   return (
     <TouchableOpacity
       style={[
@@ -19,12 +20,12 @@ export default function PrimaryButton({
       ]}
       onPress={onPress}
       disabled={disabled || loading}
-      activeOpacity={0.8}
+      activeOpacity={0.85}
     >
       {loading ? (
-        <ActivityIndicator color="#FFFFFF" size="small" />
+        <ActivityIndicator color={fg} size="small" />
       ) : (
-        <Text style={styles.text}>{title}</Text>
+        <Text style={[styles.text, { color: fg }]}>{title}</Text>
       )}
     </TouchableOpacity>
   );
@@ -33,15 +34,16 @@ export default function PrimaryButton({
 const styles = StyleSheet.create({
   btn: {
     width: "100%",
-    paddingVertical: 15,
+    minHeight: 48,
     borderRadius: 12,
+    paddingHorizontal: 16,
     alignItems: "center",
     justifyContent: "center",
   },
   text: {
-    color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "600",
     letterSpacing: 0.2,
   },
 });
+

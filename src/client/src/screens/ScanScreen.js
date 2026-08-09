@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  StatusBar,
   Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -15,13 +14,16 @@ import { useInference } from "../ml/useInference";
 import { useApp } from "../context/AppContext";
 import { DISEASE_DETAILS } from "../constants/diseaseData";
 import { parseDiseaseLabel } from "../utils/parseDiseaseLabel";
-import TopBar from "../components/TopBar";
+import Screen from "../components/Screen";
+import AppHeader from "../components/AppHeader";
 import ImagePickerSection from "../components/ImagePickerSection";
 import ResultCard from "../components/ResultCard";
+import LanguageSheet from "../components/LanguageSheet";
 
 export default function ScanScreen() {
   const [image, setImage] = useState(null);
-  const { t, c, lang, isDark, toggleTheme, addScan } = useApp();
+  const [langOpen, setLangOpen] = useState(false);
+  const { t, c, lang, isDark, toggleTheme, addScan, setLanguage } = useApp();
 
   const { modelState, inferring, result, errorMessage, analyze, reset } = useInference();
 
@@ -30,7 +32,7 @@ export default function ScanScreen() {
       ? await ImagePicker.requestCameraPermissionsAsync()
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permResult.status !== "granted") {
-      Alert.alert("Permission Required", "Please allow camera or gallery access to continue.");
+      Alert.alert(t.permissionRequired, t.permissionDenied);
       return;
     }
     const options = { allowsEditing: true, aspect: [1, 1], quality: 0.92 };
@@ -84,45 +86,103 @@ export default function ScanScreen() {
 
   const busy = inferring || modelState === "loading";
 
+  const modelBadge = () => {
+    let bg, fg, text;
+    if (modelState === "ready" || modelState === "idle") {
+      bg = c.accentSoft;
+      fg = c.accentText;
+      text = modelState === "ready" ? t.modelReady : t.modelIdle;
+    } else if (modelState === "error") {
+      bg = c.dangerSoft;
+      fg = c.danger;
+      text = t.modelError;
+    } else {
+      bg = c.warningSoft;
+      fg = c.warning;
+      text = t.modelLoading;
+    }
+    return (
+      <View style={[styles.modelBadge, { backgroundColor: bg }]}>
+        <Text style={[styles.modelBadgeText, { color: fg }]}>{text}</Text>
+      </View>
+    );
+  };
+
   return (
-    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+    <Screen c={c}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        <AppHeader
+          c={c}
+          t={t}
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
+          onOpenLanguage={() => setLangOpen(true)}
+        />
 
-      <TopBar title={t.title} t={t} modelState={modelState} isDark={isDark} onToggleTheme={toggleTheme} c={c} />
+        <View style={styles.head}>
+          <Text style={[styles.title, { color: c.text }]}>{t.title}</Text>
+          <Text style={[styles.subtitle, { color: c.textMuted }]}>{t.subtitle}</Text>
+          <View style={styles.modelRow}>{modelBadge()}</View>
+        </View>
 
-      <Text style={[styles.subtitle, { color: c.textMuted }]}>{t.subtitle}</Text>
+        <ImagePickerSection
+          image={image}
+          t={t}
+          c={c}
+          busy={busy}
+          onPick={(mode) => {
+            if (mode === null) {
+              setImage(null);
+              reset();
+            } else {
+              handleImagePick(!!mode);
+            }
+          }}
+        />
 
-      <ImagePickerSection image={image} t={t} c={c} onPick={handleImagePick} />
+        {image && (
+          <TouchableOpacity
+            style={[styles.primaryBtn, { backgroundColor: busy ? c.accentSoft : c.accent, opacity: busy ? 0.7 : 1 }]}
+            onPress={processImage}
+            disabled={busy}
+            activeOpacity={0.85}
+          >
+            {busy ? (
+              <ActivityIndicator color={c.primaryForeground || "#FFFFFF"} size="small" />
+            ) : (
+              <Text style={[styles.primaryBtnText, { color: c.primaryForeground || "#FFFFFF" }]}>
+                {t.button}
+              </Text>
+            )}
+          </TouchableOpacity>
+        )}
 
-      {image && (
-        <TouchableOpacity
-          style={[styles.primaryBtn, { backgroundColor: busy ? c.accentSoft : c.accent, opacity: busy ? 0.7 : 1 }]}
-          onPress={processImage}
-          disabled={busy}
-          activeOpacity={0.8}
-        >
-          {busy ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
-          ) : (
-            <Text style={styles.primaryBtnText}>{t.button}</Text>
-          )}
-        </TouchableOpacity>
-      )}
+        {image && result && (
+          <TouchableOpacity
+            style={[styles.secondaryActionBtn, { borderColor: c.border }]}
+            onPress={() => { setImage(null); reset(); }}
+            activeOpacity={0.75}
+          >
+            <Text style={[styles.secondaryActionText, { color: c.textMuted }]}>{t.newScan}</Text>
+          </TouchableOpacity>
+        )}
 
-      {image && result && (
-        <TouchableOpacity
-          style={[styles.secondaryActionBtn, { borderColor: c.border }]}
-          onPress={() => { setImage(null); reset(); }}
-          activeOpacity={0.75}
-        >
-          <Text style={[styles.secondaryActionText, { color: c.textMuted }]}>{t.newScan}</Text>
-        </TouchableOpacity>
-      )}
+        <ResultCard result={getResultWithDetails()} t={t} c={c} lang={lang} />
 
-      <ResultCard result={getResultWithDetails()} t={t} c={c} lang={lang} />
+        <View style={styles.bottomSpacer} />
 
-      <View style={styles.bottomSpacer} />
-    </ScrollView>
+        <LanguageSheet
+          visible={langOpen}
+          onClose={() => setLangOpen(false)}
+          lang={lang}
+          onSelect={setLanguage}
+          c={c}
+        />
+      </ScrollView>
+    </Screen>
   );
 }
 
@@ -133,24 +193,34 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "ios" ? 56 : 32,
     paddingBottom: 40,
   },
+  head: { marginBottom: 18 },
+  title: { fontSize: 24, fontWeight: "700", letterSpacing: -0.5 },
   subtitle: {
     fontSize: 13,
-    lineHeight: 18,
-    textAlign: "center",
-    marginBottom: 16,
+    lineHeight: 19,
+    marginTop: 6,
   },
+  modelRow: { marginTop: 10 },
+  modelBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 99,
+  },
+  modelBadgeText: { fontSize: 11, fontWeight: "600", letterSpacing: 0.2 },
   primaryBtn: {
     width: "100%",
-    paddingVertical: 15,
+    minHeight: 50,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 16,
     marginBottom: 8,
   },
-  primaryBtnText: { color: "#FFFFFF", fontSize: 15, fontWeight: "700", letterSpacing: 0.2 },
+  primaryBtnText: { fontSize: 15, fontWeight: "600", letterSpacing: 0.2 },
   secondaryActionBtn: {
     width: "100%",
-    paddingVertical: 12,
+    minHeight: 48,
     borderRadius: 12,
     borderWidth: 1,
     alignItems: "center",

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useApp } from "../context/AppContext";
 import { Ionicons } from "@expo/vector-icons";
+import Screen from "../components/Screen";
 import FormInput from "../components/FormInput";
 import PrimaryButton from "../components/PrimaryButton";
 
@@ -43,67 +44,73 @@ export default function SignInScreen({ navigation }) {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={[styles.flex, { backgroundColor: c.bg }]}
-    >
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+    <Screen c={c}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.flex}
       >
-        <View style={styles.logoWrap}>
-          <Ionicons name="leaf" size={48} color={c.accent} />
-        </View>
-        <Text style={[styles.title, { color: c.text }]}>{t.signInTitle}</Text>
-        <Text style={[styles.subtitle, { color: c.textMuted }]}>
-          {t.signInSubtitle}
-        </Text>
-
-        <FormInput
-          label={t.email}
-          c={c}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="you@example.com"
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        <FormInput
-          label={t.password}
-          c={c}
-          value={password}
-          onChangeText={setPassword}
-          placeholder="••••••••"
-          secureTextEntry
-        />
-
-        {error ? (
-          <Text style={[styles.error, { color: c.danger }]}>{error}</Text>
-        ) : null}
-
-        <PrimaryButton
-          title={t.signIn}
-          onPress={handleSubmit}
-          loading={loading}
-          c={c}
-          style={styles.submitBtn}
-        />
-
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.link}
-          activeOpacity={0.7}
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={[styles.linkText, { color: c.textMuted }]}>
-            {t.noAccount}{" "}
-            <Text style={{ color: c.accent, fontWeight: "700" }}>
-              {t.getStartedNow}
-            </Text>
+          <View style={[styles.iconTile, { backgroundColor: c.accentDeep }]}>
+            <Ionicons name="log-in" size={26} color="#FFFFFF" />
+          </View>
+          <Text style={[styles.title, { color: c.text }]}>{t.signInTitle}</Text>
+          <Text style={[styles.subtitle, { color: c.textMuted }]}>
+            {t.signInSubtitle}
           </Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+          <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
+            <FormInput
+              label={t.email}
+              c={c}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="you@example.com"
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            <FormInput
+              label={t.password}
+              c={c}
+              value={password}
+              onChangeText={setPassword}
+              placeholder="••••••••"
+              secureTextEntry
+            />
+
+            {error ? (
+              <View style={[styles.errorBox, { backgroundColor: c.dangerSoft }]}>
+                <Text style={[styles.errorText, { color: c.danger }]}>{error}</Text>
+              </View>
+            ) : null}
+
+            <PrimaryButton
+              title={t.signIn}
+              onPress={handleSubmit}
+              loading={loading}
+              c={c}
+              style={styles.submitBtn}
+            />
+          </View>
+
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.link}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.linkText, { color: c.textMuted }]}>
+              {t.noAccount}{" "}
+              <Text style={{ color: c.accentText, fontWeight: "700" }}>
+                {t.getStartedNow}
+              </Text>
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </Screen>
   );
 }
 
@@ -111,21 +118,40 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   container: {
     flexGrow: 1,
+    justifyContent: "center",
     paddingHorizontal: 24,
-    paddingTop: Platform.OS === "ios" ? 80 : 56,
+    paddingTop: Platform.OS === "ios" ? 72 : 56,
     paddingBottom: 40,
   },
-  logoWrap: { alignItems: "center", marginBottom: 16 },
-  title: { fontSize: 26, fontWeight: "700", textAlign: "center", letterSpacing: -0.4 },
+  iconTile: {
+    alignSelf: "center",
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
+  },
+  title: { fontSize: 28, fontWeight: "700", textAlign: "center", letterSpacing: -0.5 },
   subtitle: {
-    fontSize: 13,
+    fontSize: 14,
     lineHeight: 19,
     textAlign: "center",
     marginBottom: 28,
     marginTop: 6,
   },
-  error: { fontSize: 13, marginBottom: 14, textAlign: "center" },
+  card: {
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 20,
+  },
+  errorBox: {
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorText: { fontSize: 13, fontWeight: "500", lineHeight: 18 },
   submitBtn: { marginBottom: 16 },
-  link: { alignItems: "center", paddingVertical: 8 },
+  link: { alignItems: "center", paddingVertical: 12, marginTop: 8 },
   linkText: { fontSize: 13 },
 });

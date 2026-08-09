@@ -28,9 +28,9 @@ const styles = StyleSheet.create({
   label: { fontSize: 12, fontWeight: "600", marginBottom: 6 },
   input: {
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 10,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    minHeight: 48,
     fontSize: 15,
   },
 });

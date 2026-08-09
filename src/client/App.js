@@ -1,9 +1,9 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from "react-native";
+import { View, Text, StyleSheet, Platform, ActivityIndicator } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Ionicons } from "@expo/vector-icons";
+import { Home, History, ScanLine, User, Leaf } from "lucide-react-native";
 import { StatusBar } from "expo-status-bar";
 
 import { AppProvider, useApp } from "./src/context/AppContext";
@@ -24,28 +24,10 @@ import ChangePasswordScreen from "./src/screens/ChangePasswordScreen";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// ─── Center "Quick Action" tab button (prominent, floating) ──────────────────
-
-function ScanTabButton({ children, onPress }) {
-  return (
-    <TouchableOpacity
-      style={styles.scanTabWrap}
-      onPress={onPress}
-      activeOpacity={0.85}
-      accessibilityRole="button"
-    >
-      <View style={[styles.scanTabBtn, { backgroundColor: "#3FB950" }]}>
-        <Ionicons name="scan-outline" size={26} color="#FFFFFF" />
-      </View>
-      {children}
-    </TouchableOpacity>
-  );
-}
-
 // ─── Main tab navigator ───────────────────────────────────────────────────────
 
 function MainTabs() {
-  const { t, c, isDark } = useApp();
+  const { t, c } = useApp();
 
   return (
     <Tab.Navigator
@@ -55,8 +37,11 @@ function MainTabs() {
         tabBarStyle: {
           backgroundColor: c.surface,
           borderTopColor: c.border,
+          height: Platform.OS === "ios" ? 84 : 66,
+          paddingBottom: Platform.OS === "ios" ? 22 : 8,
+          paddingTop: 6,
         },
-        tabBarActiveTintColor: c.accent,
+        tabBarActiveTintColor: c.tabActive,
         tabBarInactiveTintColor: c.textMuted,
         tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
       }}
@@ -67,7 +52,17 @@ function MainTabs() {
         options={{
           tabBarLabel: t.homeTab,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Home size={size} color={color} strokeWidth={2.2} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="QuickAction"
+        component={ScanScreen}
+        options={{
+          tabBarLabel: t.quickAction,
+          tabBarIcon: ({ color, size }) => (
+            <ScanLine size={size} color={color} strokeWidth={2.2} />
           ),
         }}
       />
@@ -77,26 +72,17 @@ function MainTabs() {
         options={{
           tabBarLabel: t.historyTab,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="time" size={size} color={color} />
+            <History size={size} color={color} strokeWidth={2.2} />
           ),
-        }}
-      />
-      <Tab.Screen
-        name="QuickAction"
-        component={ScanScreen}
-        options={{
-          tabBarLabel: t.quickAction,
-          tabBarButton: (props) => <ScanTabButton {...props} />,
-          tabBarIcon: () => null,
         }}
       />
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
         options={{
-          tabBarLabel: t.settingsTab,
+          tabBarLabel: t.profile,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings" size={size} color={color} />
+            <User size={size} color={color} strokeWidth={2.2} />
           ),
         }}
       />
@@ -135,8 +121,10 @@ function LoadingScreen() {
   const { c } = useApp();
   return (
     <View style={[styles.loading, { backgroundColor: c.bg }]}>
-      <Ionicons name="leaf" size={44} color={c.accent} />
-      <Text style={[styles.loadingText, { color: c.textMuted }]}>…</Text>
+      <View style={[styles.loadingTile, { backgroundColor: c.accentDeep }]}>
+        <Leaf size={30} color="#FFFFFF" strokeWidth={2.2} />
+      </View>
+      <ActivityIndicator color={c.accent} style={styles.loadingSpinner} />
     </View>
   );
 }
@@ -165,29 +153,18 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  scanTabWrap: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  scanTabBtn: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: Platform.OS === "ios" ? -8 : -16,
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 6,
-  },
   loading: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    gap: 10,
+    gap: 16,
   },
-  loadingText: { fontSize: 13 },
+  loadingTile: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingSpinner: { marginTop: 4 },
 });

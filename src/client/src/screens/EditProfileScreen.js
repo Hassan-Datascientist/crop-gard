@@ -14,6 +14,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../context/AppContext";
 import FormInput from "../components/FormInput";
 import PrimaryButton from "../components/PrimaryButton";
+import Screen from "../components/Screen";
+import SubHeader from "../components/SubHeader";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -25,6 +27,8 @@ export default function EditProfileScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const initial = (firstName || user?.first_name || " ")[0]?.toUpperCase() || "?";
 
   const handleSave = async () => {
     setError(null);
@@ -101,131 +105,167 @@ export default function EditProfileScreen({ navigation }) {
   };
 
   return (
-    <View style={[styles.flex, { backgroundColor: c.bg }]}>
-      <View style={[styles.header, { borderBottomColor: c.border }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
-          <Text style={[styles.back, { color: c.textMuted }]}>‹</Text>
-        </TouchableOpacity>
-        <Text style={[styles.pageTitle, { color: c.text }]}>{t.editProfile}</Text>
-        <View style={{ width: 28 }} />
-      </View>
+    <Screen c={c}>
+      <View style={styles.flex}>
+        <View style={styles.headerWrap}>
+          <SubHeader
+            title={t.editProfile}
+            c={c}
+            onBack={() => navigation.goBack()}
+          />
+        </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.avatarRow}>
-          {user?.avatar_url ? (
-            <Image source={{ uri: user.avatar_url }} style={[styles.avatar, { borderColor: c.border }]} />
-          ) : (
-            <View style={[styles.avatar, styles.avatarFallback, { backgroundColor: c.surfaceAlt, borderColor: c.border }]}>
-              <Ionicons name="person" size={44} color={c.textMuted} />
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={[styles.profileCard, { backgroundColor: c.surface, borderColor: c.border }]}>
+            <View>
+              {user?.avatar_url ? (
+                <Image source={{ uri: user.avatar_url }} style={[styles.avatar, { borderColor: c.border }]} />
+              ) : (
+                <View style={[styles.avatar, styles.avatarInitial, { backgroundColor: c.accentDeep }]}>
+                  <Text style={styles.avatarInitialText}>{initial}</Text>
+                </View>
+              )}
+              <TouchableOpacity
+                style={[styles.cameraBtn, { backgroundColor: c.accentDeep, borderColor: c.surface }]}
+                onPress={handleChangePhoto}
+                disabled={avatarLoading}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="camera" size={14} color="#FFFFFF" />
+              </TouchableOpacity>
             </View>
-          )}
-          <View style={styles.avatarActions}>
-            <TouchableOpacity
-              style={[styles.avatarButton, { borderColor: c.border }]}
-              onPress={handleChangePhoto}
-              disabled={avatarLoading}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="camera-outline" size={16} color={c.accent} />
-              <Text style={[styles.avatarButtonText, { color: c.accent }]}>{t.changePhoto}</Text>
-            </TouchableOpacity>
+
+            <Text style={[styles.profileName, { color: c.text }]}>
+              {firstName} {lastName}
+            </Text>
+            <Text style={[styles.profileEmail, { color: c.textMuted }]}>{email}</Text>
+
             {user?.avatar_url ? (
               <TouchableOpacity
-                style={[styles.avatarButton, { borderColor: c.border }]}
+                style={[styles.removeBtn, { borderColor: c.danger }]}
                 onPress={handleRemovePhoto}
                 disabled={avatarLoading}
                 activeOpacity={0.7}
               >
-                <Ionicons name="trash-outline" size={16} color={c.danger} />
-                <Text style={[styles.avatarButtonText, { color: c.danger }]}>{t.removePhoto}</Text>
+                <Ionicons name="trash-outline" size={15} color={c.danger} />
+                <Text style={[styles.removeBtnText, { color: c.danger }]}>{t.removePhoto}</Text>
               </TouchableOpacity>
-            ) : null}
+            ) : (
+              <TouchableOpacity
+                style={[styles.removeBtn, { borderColor: c.border }]}
+                onPress={handleChangePhoto}
+                disabled={avatarLoading}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="camera-outline" size={15} color={c.accentText} />
+                <Text style={[styles.removeBtnText, { color: c.accentText }]}>{t.changePhoto}</Text>
+              </TouchableOpacity>
+            )}
           </View>
-        </View>
 
-        <FormInput
-          label={t.firstName}
-          c={c}
-          value={firstName}
-          onChangeText={setFirstName}
-          placeholder={t.firstName}
-          autoCapitalize="words"
-        />
-        <FormInput
-          label={t.lastName}
-          c={c}
-          value={lastName}
-          onChangeText={setLastName}
-          placeholder={t.lastName}
-          autoCapitalize="words"
-        />
-        <FormInput
-          label={t.email}
-          c={c}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="you@example.com"
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
+          <View style={[styles.formCard, { backgroundColor: c.surface, borderColor: c.border }]}>
+            <FormInput
+              label={t.firstName}
+              c={c}
+              value={firstName}
+              onChangeText={setFirstName}
+              placeholder={t.firstName}
+              autoCapitalize="words"
+            />
+            <FormInput
+              label={t.lastName}
+              c={c}
+              value={lastName}
+              onChangeText={setLastName}
+              placeholder={t.lastName}
+              autoCapitalize="words"
+            />
+            <FormInput
+              label={t.email}
+              c={c}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="you@example.com"
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
 
-        {error ? (
-          <Text style={[styles.error, { color: c.danger }]}>{error}</Text>
-        ) : null}
+            {error ? (
+              <View style={[styles.errorBox, { backgroundColor: c.dangerSoft }]}>
+                <Text style={[styles.errorText, { color: c.danger }]}>{error}</Text>
+              </View>
+            ) : null}
 
-        <PrimaryButton title={t.save} onPress={handleSave} loading={loading} c={c} />
-      </ScrollView>
-    </View>
+            <PrimaryButton title={t.save} onPress={handleSave} loading={loading} c={c} />
+          </View>
+        </ScrollView>
+      </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+  headerWrap: {
     paddingHorizontal: 20,
     paddingTop: Platform.OS === "ios" ? 56 : 32,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
+    paddingBottom: 12,
   },
-  back: { fontSize: 34, lineHeight: 34, fontWeight: "600" },
-  pageTitle: { fontSize: 18, fontWeight: "700" },
-  scroll: { padding: 20 },
-  error: { fontSize: 13, marginBottom: 14, textAlign: "center" },
-  avatarRow: {
-    flexDirection: "row",
+  scroll: { paddingHorizontal: 20, paddingBottom: 40 },
+  profileCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 24,
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 16,
   },
   avatar: {
     width: 96,
     height: 96,
-    borderRadius: 48,
+    borderRadius: 24,
     borderWidth: 2,
   },
-  avatarFallback: {
+  avatarInitial: {
     alignItems: "center",
     justifyContent: "center",
   },
-  avatarActions: {
-    flex: 1,
-    marginLeft: 18,
-    gap: 10,
+  avatarInitialText: { color: "#FFFFFF", fontSize: 34, fontWeight: "700" },
+  cameraBtn: {
+    position: "absolute",
+    bottom: -4,
+    right: -4,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  avatarButton: {
+  profileName: { fontSize: 18, fontWeight: "700", marginTop: 14 },
+  profileEmail: { fontSize: 13, marginTop: 2, marginBottom: 14 },
+  removeBtn: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
     gap: 8,
-    borderWidth: 1,
+    paddingHorizontal: 16,
+    minHeight: 40,
     borderRadius: 10,
-    paddingVertical: 9,
+    borderWidth: 1,
   },
-  avatarButtonText: { fontSize: 14, fontWeight: "600" },
+  removeBtnText: { fontSize: 13, fontWeight: "600" },
+  formCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+  },
+  errorBox: {
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorText: { fontSize: 13, fontWeight: "500", lineHeight: 18 },
 });

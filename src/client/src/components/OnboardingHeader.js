@@ -13,7 +13,7 @@ export default function OnboardingHeader({ step, total, title, subtitle, c, onBa
           accessibilityRole="button"
           accessibilityLabel="Back"
         >
-          <Ionicons name="chevron-back" size={20} color={c.textMuted} />
+          <Ionicons name="chevron-back" size={20} color={c.text} />
         </TouchableOpacity>
 
         <View style={styles.dots}>
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   backBtn: {
     width: 40,
     height: 40,
-    borderRadius: 10,
+    borderRadius: 20,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
