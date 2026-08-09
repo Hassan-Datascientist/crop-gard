@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,34 +10,41 @@ import {
   Platform,
 } from "react-native";
 import { useApp } from "../context/AppContext";
-import { Ionicons } from "@expo/vector-icons";
-import LanguageSelector from "../components/LanguageSelector";
+import {
+  ChevronRight,
+  Globe,
+  KeyRound,
+  LogOut,
+  Moon,
+  Palette,
+  Sun,
+  User,
+} from "lucide-react-native";
+import Screen from "../components/Screen";
+import AppHeader from "../components/AppHeader";
+import LanguageSheet from "../components/LanguageSheet";
 
-function Row({ label, value, icon, avatarUri, c, onPress, danger }) {
+function Row({ label, icon: Icon, avatarUri, c, onPress, danger }) {
   return (
-    <TouchableOpacity
-      style={[styles.row, { backgroundColor: c.surface, borderColor: c.border }]}
-      onPress={onPress}
-      activeOpacity={0.75}
-    >
+    <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.75}>
       {avatarUri ? (
         <Image source={{ uri: avatarUri }} style={[styles.avatar, { borderColor: c.border }]} />
       ) : (
-        <View style={[styles.rowIcon, { backgroundColor: danger ? c.danger + "22" : c.accentSoft }]}>
-          <Ionicons name={icon} size={17} color={danger ? c.danger : c.accentText} />
+        <View style={[styles.rowIcon, { backgroundColor: danger ? c.dangerSoft : c.accentSoft }]}>
+          {Icon && <Icon size={18} color={danger ? c.danger : c.accentText} strokeWidth={2} />}
         </View>
       )}
       <Text style={[styles.rowLabel, { color: danger ? c.danger : c.text }]}>
         {label}
       </Text>
-      {value ? <Text style={[styles.rowValue, { color: c.textMuted }]}>{value}</Text> : null}
-      <Ionicons name="chevron-forward" size={16} color={c.textFaint} />
+      <ChevronRight size={16} color={c.textFaint} strokeWidth={2.2} />
     </TouchableOpacity>
   );
 }
 
 export default function SettingsScreen({ navigation }) {
-  const { user, t, c, setLanguage, signOut } = useApp();
+  const { user, t, c, isDark, toggleTheme, setLanguage, signOut } = useApp();
+  const [langOpen, setLangOpen] = useState(false);
 
   const confirmSignOut = () => {
     Alert.alert(t.signOut, t.signOutConfirm, [
@@ -47,45 +54,98 @@ export default function SettingsScreen({ navigation }) {
   };
 
   return (
-    <ScrollView
-      style={{ backgroundColor: c.bg }}
-      contentContainerStyle={styles.scroll}
-      showsVerticalScrollIndicator={false}
-    >
-      <Text style={[styles.pageTitle, { color: c.text }]}>{t.settings}</Text>
+    <Screen c={c}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        <AppHeader
+          c={c}
+          t={t}
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
+          onOpenLanguage={() => setLangOpen(true)}
+        />
 
-      <Text style={[styles.sectionLabel, { color: c.textMuted }]}>{t.profile}</Text>
-      <Row
-        label={t.editProfile}
-        icon="person-outline"
-        avatarUri={user?.avatar_url}
-        value={`${user?.first_name || ""} ${user?.last_name || ""}`}
-        c={c}
-        onPress={() => navigation.navigate("EditProfile")}
-      />
+        <Text style={[styles.pageTitle, { color: c.text }]}>{t.settings}</Text>
 
-      <Text style={[styles.sectionLabel, { color: c.textMuted }]}>{t.language}</Text>
-      <LanguageSelector
-        lang={user?.language_pref || "en"}
-        onSelect={setLanguage}
-        c={c}
-      />
+        <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
+          <View style={styles.sectionHead}>
+            <View style={[styles.sectionIcon, { backgroundColor: c.accentSoft }]}>
+              <Palette size={18} color={c.accentText} strokeWidth={2} />
+            </View>
+            <Text style={[styles.sectionTitle, { color: c.text }]}>{t.appearance}</Text>
+          </View>
+          <Row
+            label={t.language}
+            icon={Globe}
+            c={c}
+            onPress={() => setLangOpen(true)}
+          />
+          <TouchableOpacity style={styles.row} onPress={toggleTheme} activeOpacity={0.75}>
+            <View style={[styles.rowIcon, { backgroundColor: c.accentSoft }]}>
+              {isDark ? (
+                <Moon size={18} color={c.accentText} strokeWidth={2} />
+              ) : (
+                <Sun size={18} color={c.accentText} strokeWidth={2} />
+              )}
+            </View>
+            <Text style={[styles.rowLabel, { color: c.text }]}>{t.theme}</Text>
+            <Text style={[styles.rowValue, { color: c.textMuted }]}>
+              {isDark ? t.themeDark : t.themeLight}
+            </Text>
+            <ChevronRight size={16} color={c.textFaint} strokeWidth={2.2} />
+          </TouchableOpacity>
+        </View>
 
-      <Text style={[styles.sectionLabel, { color: c.textMuted }]}>{t.account}</Text>
-      <Row
-        label={t.changePassword}
-        icon="key-outline"
-        c={c}
-        onPress={() => navigation.navigate("ChangePassword")}
-      />
-      <Row
-        label={t.signOut}
-        icon="log-out-outline"
-        c={c}
-        danger
-        onPress={confirmSignOut}
-      />
-    </ScrollView>
+        <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
+          <View style={styles.sectionHead}>
+            <View style={[styles.sectionIcon, { backgroundColor: c.accentSoft }]}>
+              <User size={18} color={c.accentText} strokeWidth={2} />
+            </View>
+            <Text style={[styles.sectionTitle, { color: c.text }]}>{t.account}</Text>
+          </View>
+          <Row
+            label={t.editProfile}
+            icon={User}
+            avatarUri={user?.avatar_url}
+            c={c}
+            onPress={() => navigation.navigate("EditProfile")}
+          />
+          <Row
+            label={t.changePassword}
+            icon={KeyRound}
+            c={c}
+            onPress={() => navigation.navigate("ChangePassword")}
+          />
+        </View>
+
+        <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
+          <View style={styles.sectionHead}>
+            <View style={[styles.sectionIcon, { backgroundColor: c.dangerSoft }]}>
+              <LogOut size={18} color={c.danger} strokeWidth={2} />
+            </View>
+            <Text style={[styles.sectionTitle, { color: c.text }]}>{t.session}</Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.logoutBtn, { borderColor: c.danger }]}
+            onPress={confirmSignOut}
+            activeOpacity={0.8}
+          >
+            <LogOut size={17} color={c.danger} strokeWidth={2} />
+            <Text style={[styles.logoutText, { color: c.danger }]}>{t.signOut}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <LanguageSheet
+          visible={langOpen}
+          onClose={() => setLangOpen(false)}
+          lang={user?.language_pref || "en"}
+          onSelect={setLanguage}
+          c={c}
+        />
+      </ScrollView>
+    </Screen>
   );
 }
 
@@ -96,38 +156,57 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "ios" ? 56 : 32,
     paddingBottom: 40,
   },
-  pageTitle: { fontSize: 24, fontWeight: "700", letterSpacing: -0.4, marginBottom: 24 },
-  sectionLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
-    marginBottom: 8,
-    marginTop: 18,
+  pageTitle: { fontSize: 26, fontWeight: "700", letterSpacing: -0.5, marginBottom: 18 },
+  card: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+    marginBottom: 14,
   },
+  sectionHead: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 12,
+  },
+  sectionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sectionTitle: { fontSize: 15, fontWeight: "700" },
   row: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    marginBottom: 10,
+    paddingVertical: 11,
   },
   rowIcon: {
-    width: 30,
-    height: 30,
+    width: 32,
+    height: 32,
     borderRadius: 9,
     alignItems: "center",
     justifyContent: "center",
   },
   avatar: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     borderWidth: 1,
   },
-  rowLabel: { flex: 1, fontSize: 15, fontWeight: "600" },
+  rowLabel: { flex: 1, fontSize: 15, fontWeight: "500" },
   rowValue: { fontSize: 13 },
+  logoutBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    minHeight: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 4,
+  },
+  logoutText: { fontSize: 14, fontWeight: "600" },
 });

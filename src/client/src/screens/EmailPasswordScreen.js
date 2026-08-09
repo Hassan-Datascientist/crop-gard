@@ -11,6 +11,7 @@ import { useApp } from "../context/AppContext";
 import FormInput from "../components/FormInput";
 import PrimaryButton from "../components/PrimaryButton";
 import OnboardingHeader from "../components/OnboardingHeader";
+import Screen from "../components/Screen";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -38,49 +39,55 @@ export default function EmailPasswordScreen({ navigation }) {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={[styles.flex, { backgroundColor: c.bg }]}
-    >
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+    <Screen c={c}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.flex}
       >
-        <OnboardingHeader
-          step={1}
-          total={3}
-          title={t.stepEmailTitle}
-          subtitle={t.stepEmailSubtitle}
-          c={c}
-          onBack={() => navigation.goBack()}
-        />
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <OnboardingHeader
+            step={1}
+            total={3}
+            title={t.stepEmailTitle}
+            subtitle={t.stepEmailSubtitle}
+            c={c}
+            onBack={() => navigation.goBack()}
+          />
 
-        <FormInput
-          label={t.email}
-          c={c}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="you@example.com"
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        <FormInput
-          label={t.password}
-          c={c}
-          value={password}
-          onChangeText={setPassword}
-          placeholder="••••••••"
-          secureTextEntry
-        />
+          <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
+            <FormInput
+              label={t.email}
+              c={c}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="you@example.com"
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            <FormInput
+              label={t.password}
+              c={c}
+              value={password}
+              onChangeText={setPassword}
+              placeholder="••••••••"
+              secureTextEntry
+            />
 
-        {error ? (
-          <Text style={[styles.error, { color: c.danger }]}>{error}</Text>
-        ) : null}
+            {error ? (
+              <View style={[styles.errorBox, { backgroundColor: c.dangerSoft }]}>
+                <Text style={[styles.errorText, { color: c.danger }]}>{error}</Text>
+              </View>
+            ) : null}
 
-        <PrimaryButton title={t.continue} onPress={handleContinue} c={c} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+            <PrimaryButton title={t.continue} onPress={handleContinue} c={c} />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </Screen>
   );
 }
 
@@ -92,5 +99,15 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "ios" ? 72 : 56,
     paddingBottom: 40,
   },
-  error: { fontSize: 13, marginBottom: 14, textAlign: "center" },
+  card: {
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 20,
+  },
+  errorBox: {
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorText: { fontSize: 13, fontWeight: "500", lineHeight: 18 },
 });
